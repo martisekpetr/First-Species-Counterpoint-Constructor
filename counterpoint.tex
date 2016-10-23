@@ -1,0 +1,286 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+
+% This is a simple template for a LaTeX document using the "article" class.
+% See "book", "report", "letter" for other types of document.
+
+\documentclass[11pt]{article} % use larger type; default would be 10pt
+
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+\geometry{a4paper} % or letterpaper (US) or a5paper or....
+\geometry{margin=0.9in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+\usepackage{wrapfig}
+
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+\usepackage[czech]{babel}
+\usepackage{hyperref}
+\usepackage{caption}
+\captionsetup[table]{name=Table}
+
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+\usepackage{sectsty}
+\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+% (This matches ConTeXt defaults)
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlof,notlot]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+\usepackage[font=footnotesize, labelfont={sf,bf}, margin=1cm]{caption}
+\usepackage{float}
+\usepackage{amsmath}
+
+%%% END Article customizations
+
+%%% The "real" document content comes below...
+
+\title{\textbf{First species counterpoint}\\Constraint Programming - Course project}
+\author{Petr Martišek}
+\date{} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+
+\begin{document}
+\maketitle
+\setlength{\parskip}{5pt}
+\section{Problem definition}
+The program solves the problem of constructing a \emph{first species counterpoint}, i.e. creating a second voice for a given melody according to a set of strict rules developed and used during the Renaissance.
+
+\textbf{Counterpoint}, from Latin \emph{punctus contra punctum} -- “point against point”, is a term describing a relationship between voices, which are harmonically interdependent (constrained by a set of allowed intervals and harmonic progressions), but otherwise independent in melody and rhythm. First voice and counterpoint often move against each other (if one ascends, the other descends) to create interesting harmonies. 
+
+\textbf{First species counterpoint} (or \emph{note against note} counterpoint) is the simplest of all the types of counterpoint. The second voice lacks the freedom in rhythm: for each note in the given melody there is a note of exactly the same length in the counterpoint.
+
+Higher species of counterpoint exist, which introduce rhythmic independence and allow to use more shorter notes against one long note in the given main melody.
+\section{Music theory background}
+Basic knowledge of certain aspects of music theory is required to understand the rules used for the construction of a counterpoint. They will be introduced in this section.
+
+\subsection{Intervals}
+\textbf{Interval} denotes a distance between two notes measured in \emph{semitones}. Listing of relevant intervals together with an example in C major scale is given in table \ref{int}.
+\begin{table}[]
+\centering
+\caption{Music intervals}
+\label{int}
+\begin{tabular}{|l|l|l|}
+\hline
+distance (semitones) & interval                           & note in C major \\ \hline
+0                    & unison                             & C               \\ \hline
+1                    & minor second                       & C\#             \\ \hline
+2                    & major second                       & D               \\ \hline
+3                    & minor third                        & D\#             \\ \hline
+4                    & major third                        & E               \\ \hline
+5                    & perfect fourth                     & F               \\ \hline
+6                    & diminished fifth \emph{(tritone)} & F\#             \\ \hline
+7                    & perfect fifth                      & G               \\ \hline
+8                    & minor sixth                        & G\#             \\ \hline
+9                    & major sixth                        & A               \\ \hline
+10                   & minor seventh                      & A\#             \\ \hline
+11                   & major seventh                      & B               \\ \hline
+12                   & octave & C               \\ \hline
+13                   & minor ninth & C\#               \\ \hline
+14                   & major ninth & D               \\ \hline
+15                   & minor tenth& D\#               \\ \hline
+16                   & major tenth& E               \\ \hline
+\dots                   & \dots 			& \dots               \\ \hline
+\end{tabular}
+\end{table}
+
+
+\subsection{Motions}
+There are four possible types of motion in two-part counterpoint:
+\begin{description}
+\leftskip=20pt
+\setlength{\itemsep}{0cm}%
+  \setlength{\parskip}{0cm}%
+\item[parallel motion] \hfill\\ both voices move in the same direction and by the same interval
+\item[similar motion] \hfill\\both voices move in the same direction but by different intervals (different “angles”)
+\item[contrary motion] \hfill\\voices move in the opposite directions
+\item[oblique motion] \hfill\\one voice stays on the same note, the other moves
+\end{description}
+\section{Rules}
+Music counterpoint was first thoroughly described by J. J. Fux in 1725 and his work was translated to English by Alfred Mann in 1965 \cite{fux}. However, since the book is written as a story of a music student and his teacher, the rules are embedded in the story instead of explicitly listed. There are on-line sources\footnote{\url{http://www.ars-nova.com/CounterpointStudy/writefirstspecies.html}} \footnote{\url{http://hum.uchicago.edu/classes/zbikowski/species.html}} \footnote{\url{http://davesmey.com/theory/firstspecies.pdf}} with compact, structured rules extracted from the book, which proved much more useful. 
+
+Not all of the rules are of an exact nature. There are also recommendations, notions to prefer certain progression over another in different situations etc. We have chosen only those rules which can be represented as deterministic constraints in Prolog. However, some of the less restrictive rules are implemented as conditions which we try to optimize.
+
+Let $m_0, \dots m_n$ denote the notes of the main melody and $c_0, \dots c_n$ notes of the constructed counterpoint. Now we will list the rules for constructing first species counterpoint in a form of both an English sentence and an exact symbolic representation.
+\subsection{Horizontal (melodic) rules}
+These are rules about the melodic properties of the counterpoint, i.e. not related to the first voice.
+\begin{description}
+\leftskip=20pt
+\item[singable range] \hfill\\
+Range of the voice should not exceed a major tenth (= 16 semitones) from its highest to its lowest pitch.  \\
+$$max_i(c_i) - min_i(c_i) \leq 16$$
+\bigskip
+
+\item[no big leap] \hfill\\
+Interval between adjacent notes should not exceed a fifth, except for the octave and the ascending minor sixth.  \\
+$$\forall_{i} (|c_i - c_{i+1}| \leq 7 \lor |c_i - c_{i+1}| = 12 \lor c_i - c_{i+1} = -8)$$
+
+\item[no chromatic move] \hfill\\
+No voice should move by a chromatic interval (any augmented or diminished interval).\\
+(\emph{In conjunction with the previous rule, this effectively prohibits only diminished fifth, a.k.a \emph{tritone}}).
+$$\forall_{i} (|c_i - c_{i+1}| \neq 6)$$
+
+\item[no repeated notes] \hfill\\
+Do not repeat the same note more than once.  \\
+$$\neg\exists_{i} (c_i = c_{i+1} = c_{i+2})$$
+
+\item[compensate leap] \hfill\\
+Leaps greater than a fifth should be compensated by movement in the opposite direction. If the leap is ascending, make sure the compensation is stepwise.
+\begin{align*}
+\forall_{i} (c_i - c_{i+1} \geq 7 &\Rightarrow c_{i+2} > c_{i+1})\\
+\forall_{i} (c_{i+1} - c_i \geq 7 &\Rightarrow (c_{i+2} < c_{i+1} \land |c_{i+2} - c_{i+1}| \leq 2))
+\end{align*}
+
+\item[compensate octave leap] \hfill\\
+ A leap of an octave should be balanced: preceded and followed by notes within the octave.
+\begin{align*}
+\forall_{i} |c_{i+1} - c_{i+2}| = 12 \Rightarrow (|c_{i} - c_{i+1}| < 12 &\land |c_{i} - c_{i+2}| < 12 \ \land\\ |c_{i+3} - c_{i+1}| < 12  &\land |c_{i+3} - c_{i+2}| < 12)
+\end{align*}
+
+\item[arpeggiating triads] \hfill\\
+Two leaps (intervals larger than 2 semitones) in the same direction are allowed only if they spell out a triad shape (i.e. both leaps are thirds (= 3 or 4 semitones)).
+\begin{align*}
+\forall_{i} (|c_{i} - c_{i+1}| > 2\ &\land\ |c_{i+1} - c_{i+2}| >\ 2\ \land (c_{i} - c_{i+1})*(c_{i+1} - c_{i+2}) > 0) \\ 
+&\Rightarrow (|c_{i} - c_{i+1}| \leq 4\ \land\ |c_{i+1} - c_{i+2}| \leq 4)
+\end{align*}
+
+\item[cadence] \hfill\\
+Allowed intervals between last note and the note before are minor or major second or a perfect fifth.
+$$|c_{n-1} - c_{n}| \in \{1,2,7\}$$
+\end{description}
+
+\subsection{Vertical (harmonic) rules}
+These rules describe harmonic properties of the counterpoint with respect to the main melody.
+\begin{description}
+\leftskip=20pt
+\item[allowed intervals] \hfill\\
+Only consonant intervals are allowed between the main melody and the counterpoint: perfect fifth, octave and unison and minor or major third, sixth and tenth (octave + third). Unisons are allowed only in the beginning or in the end of the piece.
+$$\forall_i|m_i - c_i| \in \{0,3,4,7,8,9,12,15,16\} \land\ ((i \neq 0 \land i \neq n) \Rightarrow |m_i - c_i| \neq 0)$$
+
+\item[perfect beginning]\hfill\\
+The first note of counterpoint has to be octave below, unison, fifth above or octave above.
+$$(c_0 - m_0) \in \{-12,0,7,12\}$$
+
+\item[perfect ending]\hfill\\
+The last note of counterpoint has to be an octave or unison.
+$$|c_0 - m_0| \in \{0,12\}$$
+
+\item[no crossing]\hfill\\
+Voices should not cross (if the second voice is below the first one, it must not move above and vice versa).
+\begin{align*}
+\forall_{i} (c_{i} < m_{i} \Rightarrow c_{i+1} \leq m_{i+1})\\
+\forall_{i} (c_{i} > m_{i} \Rightarrow c_{i+1} \geq m_{i+1})\\
+\end{align*}
+
+\item[no cross tritone]\hfill\\
+Avoid adjacent use in different voices of two pitches that form the tritone (diminished fifth). 
+\begin{align*}
+\forall_i|c_i - m_{i+1}| \neq 6\\
+\forall_i|c_{i+1} - m_i| \neq 6
+\end{align*}
+
+\item[not too many thirds]\hfill\\
+Avoid writing more than three consecutive thirds in a row. 
+\begin{align*}
+\forall_i&(|c_i - m_i| \neq 3 \land |c_i - m_i| \neq 4)\ \lor\\
+&(|c_{i+1} - m_{i+1}| \neq 3 \land |c_{i+1} - m_{i+1}| \neq 4)\ \lor\\
+&(|c_{i+2} - m_{i+2}| \neq 3 \land |c_{i+2} - m_{i+2}| \neq 4)\ \lor\\
+&(|c_{i+3} - m_{i+3}| \neq 3 \land |c_{i+3} - m_{i+3}| \neq 4)\ \lor\\
+\end{align*}
+
+\item[not too many sixths]\hfill\\
+Avoid writing more than three consecutive sixths in a row. 
+\begin{align*}
+\forall_i&(|c_i - m_i| \neq 8 \land |c_i - m_i| \neq 9)\ \lor\\
+&(|c_{i+1} - m_{i+1}| \neq 8 \land |c_{i+1} - m_{i+1}| \neq 9)\ \lor\\
+&(|c_{i+2} - m_{i+2}| \neq 8 \land |c_{i+2} - m_{i+2}| \neq 9)\ \lor\\
+&(|c_{i+3} - m_{i+3}| \neq 8 \land |c_{i+3} - m_{i+3}| \neq 9)\ \lor\\
+\end{align*}
+
+\item[not too many tenths]\hfill\\
+Avoid writing more than three consecutive tenths in a row. 
+\begin{align*}
+\forall_i&(|c_i - m_i| \neq 15 \land |c_i - m_i| \neq 16)\ \lor\\
+&(|c_{i+1} - m_{i+1}| \neq 15 \land |c_{i+1} - m_{i+1}| \neq 16)\ \lor\\
+&(|c_{i+2} - m_{i+2}| \neq 15 \land |c_{i+2} - m_{i+2}| \neq 16)\ \lor\\
+&(|c_{i+3} - m_{i+3}| \neq 15 \land |c_{i+3} - m_{i+3}| \neq 16)\ \lor\\
+\end{align*}
+
+\item[entering fifth or octave]\hfill\\
+Only contrary or oblique motion are acceptable ways to enter into a fifth or octave. Only exception is when landing on a final note. Do not move to a fifth or octave with leaping motion (interval greater than major second) in either voice unless the movement is oblique. 
+
+\begin{align*}
+\forall_{i\neq n}|c_i - m_i| &= 12 \Rightarrow\\
+&((c_{i-1} - c_i)*(m_{i-1}-m_i) < 0\ \land |c_{i-1} - c_i| \leq 2\ \land |m_{i-1} - m_i| \leq 2)\ \lor\\
+&((c_{i-1} - c_i)*(m_{i-1}-m_i) = 0\ \land |c_{i-1} - m_{i-1}| \neq 12
+\end{align*}
+\begin{align*}
+\forall_{i\neq n}|c_i - m_i| &= 7 \Rightarrow\\
+&((c_{i-1} - c_i)*(m_{i-1}-m_i) < 0\ \land |c_{i-1} - c_i| \leq 2\ \land |m_{i-1} - m_i| \leq 2)\ \lor\\
+&((c_{i-1} - c_i)*(m_{i-1}-m_i) = 0\ \land |c_{i-1} - m_{i-1}| \neq 7
+\end{align*}
+
+
+\end{description}
+\section{Optimization}
+We have adopted several rules as goals to optimize during the construction in order to find the best possible counterpoint.
+\begin{enumerate}
+\leftskip=20pt
+\item Prefer imperfect intervals (thirds, sixths, tenths) over perfect ones (fifths, octaves, unisons).
+
+\item To promote independence of voices, contrary motion is preferred over other motions, and similar motion is preferred over parallel or oblique motion.
+
+\item Moving by steps (intervals of at most 2 semitones) is preferred over leaps (larger intervals).
+\end{enumerate}
+
+\noindent The objective function is then computed as 
+$$Objective = Imperfects + Steps + (3*Contrary + Similar - Oblique - 2*Parallel)\ ,$$
+where $Imperfects$ denotes number of imperfect intervals in the piece, $Steps$ the number of stepwise motions and $Contrary$, $Similar$, $Oblique$ and $Parallel$ numbers of the respective motions.
+
+\section{Implementation remarks}
+Music notes are represented as MIDI numbers and range from low A0 (MIDI number 21) to high C8 (MIDI number 108). Since there is no freedom of rhythm in the first species counterpoint, we omit the length of the notes and represent the melody only as a sequence of pitches. 
+
+To create correct harmonies, we need to determine the key of the given melody. This is achieved by custom Prolog predicate \texttt{get\_key(+Melody,-Key)}, which tests the melody against all possible major scales derived from all possible keys A, A\#, B, C, \dots , G\# (represented by MIDI notes 21 to 32) and chooses the most probable key based on the largest number of matches.
+
+The entry point of the application is the predicate \texttt{counterpoint(+Melody,-Counterpoint)}, which expects the melody represented as Prolog list of MIDI numbers and outputs the counterpoint in the same fashion. Both voices are saved to the file \texttt{out.txt}. To generate a music file and listen to the result, one can use a simple Python script \texttt{createmidi.py} (without any arguments) provided in the project folder.
+
+Testing data are provided in \texttt{input.pl} as a set of Prolog facts in the form \texttt{input(-Melody)}. To use them, simply consult both the \texttt{input.pl} and \texttt{counterpoint.pl} and then query \texttt{?-input(Melody), counterpoint(Melody, Counterpoint).}
+
+
+\begin{thebibliography}{9}
+
+\bibitem{fux}
+  {\sc Fux,} J.J., {\sc Mann,} A. and {\sc Edmunds,} J., 
+  \emph{Gradus Ad Parnassum: The Study of Counterpoint}.
+  WW Norton \& Company.
+  1965.
+  
+\end{thebibliography}
+\end{document}
